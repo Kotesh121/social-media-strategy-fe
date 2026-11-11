@@ -12,15 +12,22 @@ pipeline {
     stages {
         stage('Checkout Application') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/BloomTech-Labs/social-media-strategy-fe.git'
+                dir('app') {
+                    deleteDir()
+                    git branch: 'master',
+                        url: 'https://github.com/BloomTech-Labs/social-media-strategy-fe.git'
+                }
             }
         }
 
         stage('Verify Environment') {
             steps {
-                sh 'docker --version'
-                sh 'git --version'
+                sh '''
+                    docker --version
+                    git --version
+                    ls -la
+                    ls -la app
+                '''
             }
         }
 
@@ -28,11 +35,13 @@ pipeline {
             steps {
                 sh '''
                     docker build \
+                      -f Dockerfile \
                       --build-arg REACT_APP_API_URL="$API_URL" \
                       --build-arg REACT_APP_OKTA_DOMAIN="" \
                       --build-arg REACT_APP_OKTA_CLIENT_ID="" \
                       -t ${IMAGE_NAME}:${BUILD_NUMBER} \
-                      -t ${IMAGE_NAME}:latest .
+                      -t ${IMAGE_NAME}:latest \
+                      app
                 '''
             }
         }
@@ -67,7 +76,7 @@ pipeline {
             echo 'Frontend deployment successful!'
         }
         failure {
-            echo 'Deployment failed. Check console output.'
+            echo 'Deployment failed. Check Jenkins console output.'
         }
     }
 }
