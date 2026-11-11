@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Application') {
             steps {
                 git branch: 'master',
                     url: 'https://github.com/BloomTech-Labs/social-media-strategy-fe.git'
@@ -26,21 +26,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'social-okta-domain',
-                           variable: 'OKTA_DOMAIN'),
-                    string(credentialsId: 'social-okta-client-id',
-                           variable: 'OKTA_CLIENT_ID')
-                ]) {
-                    sh '''
-                        docker build \
-                          --build-arg REACT_APP_API_URL="$API_URL" \
-                          --build-arg REACT_APP_OKTA_DOMAIN="$OKTA_DOMAIN" \
-                          --build-arg REACT_APP_OKTA_CLIENT_ID="$OKTA_CLIENT_ID" \
-                          -t ${IMAGE_NAME}:${BUILD_NUMBER} \
-                          -t ${IMAGE_NAME}:latest .
-                    '''
-                }
+                sh '''
+                    docker build \
+                      --build-arg REACT_APP_API_URL="$API_URL" \
+                      --build-arg REACT_APP_OKTA_DOMAIN="" \
+                      --build-arg REACT_APP_OKTA_CLIENT_ID="" \
+                      -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+                      -t ${IMAGE_NAME}:latest .
+                '''
             }
         }
 
